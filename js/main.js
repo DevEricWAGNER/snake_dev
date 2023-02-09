@@ -96,7 +96,9 @@ class Serpent { // * REPRESENTE LES SERPENTS
 	}
 
     draw() {
-        console.log('Coucou');
+        this.annTab.forEach(function(item) {
+            item.draw();            
+        })
     }
 }
 
