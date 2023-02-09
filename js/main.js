@@ -97,8 +97,17 @@ class Serpent { // * REPRESENTE LES SERPENTS
 
     draw() {
         this.annTab.forEach(function(item) {
-            item.draw();            
-        })
+            item.draw();
+        });
+    }
+
+    move() {
+        this.annTab[0].move(this.dir);
+        for (let x = 0; x < this.annTab; x++) {
+            if (x != 0) {
+                this.annTab[x].copy(this.annTab[x-1]);
+            }
+        }
     }
 }
 
