@@ -111,6 +111,9 @@ class Serpent { // * REPRESENTE LES SERPENTS
     }
 }
 
+const serpent = new Serpent(ctx, 8, 180, 180, 1);
+serpent.draw();
+
 // const mob1 = new Anneau(ctx, 180, 180);
 // const mob2 = new Anneau(ctx, 160, 180);
 // mob1.draw();
