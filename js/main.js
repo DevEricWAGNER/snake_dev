@@ -96,7 +96,7 @@ class Serpent { // * REPRESENTE LES SERPENTS
 	}
 
     draw() {
-        
+        console.log('Coucou');
     }
 }
 
