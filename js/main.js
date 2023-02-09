@@ -28,37 +28,37 @@ class Anneau { // * REPRESENTE LES ANNEAUX DU SERPENT
 
     draw() {
         this.ctx.fillStyle = this.color;
-		this.ctx.fillRect(this.i, this.j, this.radius, this.radius);
+		this.ctx.fillRect(this.i*this.radius, this.j*this.radius, this.radius, this.radius);
     }
 
     move(d) {
         const canvasWidth = this.ctx.canvas.clientWidth;
 		const canvasHeight = this.ctx.canvas.clientHeight;
         if (d === 0) { // * vers le HAUT
-            this.j = this.j-20;
+            this.j = this.j-1;
         } else if (d === 1) { // * vers la DROITE
-            this.i = this.i-20;
+            this.i = this.i-1;
         } else if (d === 2) { // * vers le BAS
-            this.j = this.j+20;
+            this.j = this.j+1;
         } else if (d === 3) { // * vers la GAUCHE
-            this.i = this.i+20;
+            this.i = this.i+1;
         }
         
-        
-        if (this.i >= canvasWidth) {
+        //  Detection de bord droit
+        if (this.i >= canvasWidth/this.radius) {
 			this.i =0;
 		}
 		// Detection de bord gauche.
 		if (this.i <0) {
-			this.i = canvasWidth - this.radius;
+			this.i = canvasWidth/this.radius - 1;
 		}
 		// Detection de bord inférieur
-		if (this.j >= canvasWidth) {
-			this.j =0;
+		if (this.j >= canvasWidth/this.radius) {
+			this.j = 0;
 		}
 		// Detection de bord supérieur.
 		if (this.j <0) {
-			this.j = canvasHeight - this.radius;
+			this.j = canvasHeight/this.radius - 1;
 		}
     }
 
@@ -111,13 +111,13 @@ class Serpent { // * REPRESENTE LES SERPENTS
     }
 }
 
-const serpent = new Serpent(ctx, 8, 180, 180, 1);
-serpent.draw();
+// const serpent = new Serpent(ctx, 8, 180, 180, 1);
+// serpent.draw();
 
-// const mob1 = new Anneau(ctx, 180, 180);
-// const mob2 = new Anneau(ctx, 160, 180);
-// mob1.draw();
-// mob2.draw();
+const mob1 = new Anneau(ctx, 1, 1);
+const mob2 = new Anneau(ctx, 2, 1);
+mob1.draw();
+mob2.draw();
 
 document.onkeydown = checkKey;
 
