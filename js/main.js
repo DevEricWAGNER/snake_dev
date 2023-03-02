@@ -16,13 +16,13 @@ function getRandomColor()
 }
 
 class Anneau { // * REPRESENTE LES ANNEAUX DU SERPENT
-	constructor(ctx, i, j) {
+	constructor(ctx, i, j, color) {
 		this.ctx = ctx;
 		this.i = i;
 		this.j = j;
         this.vi = 2;
         this.vj = 2;
-		this.color = "pink";
+		this.color = color;
 		this.radius = 20;
 	}
 
@@ -69,9 +69,9 @@ class Anneau { // * REPRESENTE LES ANNEAUX DU SERPENT
 }
 
 class Serpent { // * REPRESENTE LES SERPENTS
-	constructor(ctx, lng, i, j, dir) {
+	constructor(ctx, i, j, dir) {
 		this.ctx = ctx;
-		this.lng = lng;
+		this.lng = 3;
 		this.i = i;
 		this.j = j;
 		this.dir = dir;
@@ -82,13 +82,13 @@ class Serpent { // * REPRESENTE LES SERPENTS
 
         for (let x = 0; x < this.annTab.length; x++) {
             if (x == 0) {
-                const mob = new Anneau(this.ctx, 180, 180, this.head);
+                const mob = new Anneau(this.ctx, 8, 8, this.head);
                 this.annTab.push(mob);
             } else if (x == this.lng-1) {
-                const mob = new Anneau(this.ctx, 180, 180, this.corpse);
+                const mob = new Anneau(this.ctx, 8, 6, this.queue);
                 this.annTab.push(mob);
             } else {
-                const mob = new Anneau(this.ctx, 180, 180, this.queue);
+                const mob = new Anneau(this.ctx, 8, 7, this.corpse);
                 this.annTab.push(mob);
             }
             
@@ -111,13 +111,13 @@ class Serpent { // * REPRESENTE LES SERPENTS
     }
 }
 
-// const serpent = new Serpent(ctx, 8, 180, 180, 1);
-// serpent.draw();
+const serpent = new Serpent(ctx, 8, 8, 1);
+serpent.draw();
 
-const mob1 = new Anneau(ctx, 1, 1);
-const mob2 = new Anneau(ctx, 2, 1);
-mob1.draw();
-mob2.draw();
+// const mob1 = new Anneau(ctx, 1, 1);
+// const mob2 = new Anneau(ctx, 2, 1);
+// mob1.draw();
+// mob2.draw();
 
 document.onkeydown = checkKey;
 
