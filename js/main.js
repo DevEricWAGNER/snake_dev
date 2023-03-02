@@ -181,3 +181,18 @@ function stopRAF() {
 
 // Déclenchement de l'animation
 startRAF();
+
+document.addEventListener('keydown', function(event) {
+    if(event.key == "ArrowLeft") {
+        alert('La flèche de gauche a été préssée');
+    }
+    else if(event.key == "ArrowRight") {
+        alert('La flèche de droite a été préssée');
+    }
+    else if(event.key == "ArrowUp") {
+        alert('La flèche du haut a été préssée');
+    }
+    else if(event.key == "ArrowDown") {
+        alert('La flèche du bas a été préssée');
+    }
+});
