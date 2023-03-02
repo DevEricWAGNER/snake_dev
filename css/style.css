@@ -1,3 +1,11 @@
-.canvas_color {
-    border: 2px solid #555;
+html {
+	font-family: sans-serif;
+}
+
+body {
+	padding: 10px;
+}
+
+canvas {
+	border: 1px solid black;
 }

@@ -1,6 +1,7 @@
-let canvas = document.getElementById('terrain');
-let ctx = canvas.getContext('2d');
+//------------- Fonctions utiles -------------
 
+// Fonction générant des nombres pseudo-aléatoires entiers
+// entre 0 et max (max non compris)
 function getRandomInt(max)
 {
 	return Math.floor(Math.random()*max);
@@ -13,153 +14,170 @@ function getRandomColor()
 	const blue  = Math.floor((Math.random()*256));
 	const green = Math.floor((Math.random()*256));
 	return "rgb("+red+","+green+","+blue+")";
+	//return "rgba("+red+","+green+","+blue+",0.5)";
 }
 
-class Anneau { // * REPRESENTE LES ANNEAUX DU SERPENT
-	constructor(ctx, i, j, color) {
-		this.ctx = ctx;
+//------ Récupération du canvas ------
+
+const canvas = document.getElementById('terrain');
+const ctx = canvas.getContext('2d');
+
+// Taille du côté d'un anneau en pixels dans
+const anneauSize = 20;
+// Taille de la grille du terrain en nombre de cellules
+// (on suppose que canvas.width et canvas.height sont
+// divisibles par anneauSize)
+const gridWidth = Math.floor(canvas.width / anneauSize);
+const gridHeight = Math.floor(canvas.height / anneauSize);
+
+//---------- Classe Anneau ----------
+	
+class Anneau {
+	constructor(i, j, color) {
 		this.i = i;
 		this.j = j;
-        this.vi = 2;
-        this.vj = 2;
 		this.color = color;
-		this.radius = 20;
 	}
-
-    draw() {
-        this.ctx.fillStyle = this.color;
-		this.ctx.fillRect(this.i*this.radius, this.j*this.radius, this.radius, this.radius);
-    }
-
-    move(d) {
-        const canvasWidth = this.ctx.canvas.clientWidth;
-		const canvasHeight = this.ctx.canvas.clientHeight;
-        if (d === 0) { // * vers le HAUT
-            this.j = this.j-1;
-        } else if (d === 1) { // * vers la DROITE
-            this.i = this.i-1;
-        } else if (d === 2) { // * vers le BAS
-            this.j = this.j+1;
-        } else if (d === 3) { // * vers la GAUCHE
-            this.i = this.i+1;
-        }
-        
-        //  Detection de bord droit
-        if (this.i >= canvasWidth/this.radius) {
-			this.i =0;
+	
+	draw() {
+		ctx.fillStyle = this.color;
+		ctx.fillRect(this.i * anneauSize, this.j * anneauSize,
+		anneauSize, anneauSize);
+	}
+	
+	/*
+	// 1ère version avec des if
+	move(dir) {
+		if (dir == 0) {
+			// Déplacement vers le haut
+			if (this.j == 0) {
+				this.j = gridHeight - 1;
+			}
+			else this.j--;
 		}
-		// Detection de bord gauche.
-		if (this.i <0) {
-			this.i = canvasWidth/this.radius - 1;
+		else if (dir == 1) {
+			// Déplacement vers la droite
+			if (this.i == gridWidth - 1) {
+				this.i = 0;
+			}
+			else this.i++;
 		}
-		// Detection de bord inférieur
-		if (this.j >= canvasWidth/this.radius) {
-			this.j = 0;
+		else if (dir == 2) {
+			// Déplacement vers le bas
+			if (this.j == gridHeight - 1) {
+				this.j = 0;
+			}
+			else this.j++;
 		}
-		// Detection de bord supérieur.
-		if (this.j <0) {
-			this.j = canvasHeight/this.radius - 1;
+		else if (dir == 3) {
+			// Déplacement vers la gauche
+			if (this.i == 0) {
+				this.i = gridWidth - 1;
+			}
+			this.i--;
 		}
-    }
-
-    copy(a) {
-        this.i = a.i;
-        this.j = a.j;
-    }
+	}
+	*/
+	
+	// 2ème version avec switch case
+	move(dir) {
+		switch(dir) {
+			// Déplacement vers le haut
+			case 0: this.j--; if (this.j < 0) this.j = gridHeight - 1; break;
+			// Déplacement vers la droite
+			case 1: this.i++; if (this.i > gridWidth - 1) this.i = 0; break;
+			// Déplacement vers le bas
+			case 2: this.j++; if (this.j > gridHeight - 1) this.j = 0; break;
+			// Déplacement vers la gauche
+			case 3: this.i--; if (this.i < 0) this.i = gridWidth - 1; break;
+		}	
+	}
+	
+	copy(anneau) {
+		this.i = anneau.i;
+		this.j = anneau.j;
+	}
 }
 
-class Serpent { // * REPRESENTE LES SERPENTS
-	constructor(ctx, i, j, dir) {
-		this.ctx = ctx;
-		this.lng = 3;
-		this.i = i;
-		this.j = j;
+//---------- Classe Serpent ----------
+
+class Serpent {
+	constructor(longueur, i, j, dir) {
+		// Longueur du serpent
+		this.longueur = longueur;
+		// Direction initiale
 		this.dir = dir;
-        this.annTab = [];
-        this.head = "green";
-        this.corpse = "pink";
-        this.queue = "red";
-
-        for (let x = 0; x < this.annTab.length; x++) {
-            if (x == 0) {
-                const mob = new Anneau(this.ctx, 8, 8, this.head);
-                this.annTab.push(mob);
-            } else if (x == this.lng-1) {
-                const mob = new Anneau(this.ctx, 8, 6, this.queue);
-                this.annTab.push(mob);
-            } else {
-                const mob = new Anneau(this.ctx, 8, 7, this.corpse);
-                this.annTab.push(mob);
-            }
-            
-        }
+		this.anneaux = [];
+		// Création de l'anneau de tête
+		const tete = new Anneau(i, j, '#ff0000');
+		this.anneaux.push(tete);
+		// Création des anneaux du reste du corps
+		for (let l = 1; l < longueur - 1; l++) {
+			let anneau = new Anneau(i - l, j, '#00ff00');
+			this.anneaux.push(anneau);
+		}
+		// Création de l'anneau de queue
+		const queue = new Anneau(i - (longueur - 1), j, '#0000ff');
+		this.anneaux.push(queue);
 	}
-
-    draw() {
-        this.annTab.forEach(function(item) {
-            item.draw();
-        });
-    }
-
-    move() {
-        this.annTab[0].move(this.dir);
-        for (let x = 0; x < this.annTab; x++) {
-            if (x != 0) {
-                this.annTab[x].copy(this.annTab[x-1]);
-            }
-        }
-    }
+	
+	draw() {
+		for (let l = 0; l < this.longueur; l++) {
+			this.anneaux[l].draw();
+		}
+	}
+	
+	move() {
+		// On déplace les anneaux qui précèdent la tête
+		for (let l = 1; l < this.longueur; l++) {
+			this.anneaux[this.longueur - l].copy(
+				this.anneaux[this.longueur - l - 1]);
+		}
+		// On déplace la tête
+		this.anneaux[0].move(this.dir);
+	}
+	
+	changeDirection(dir) {
+		this.dir = dir;
+	}
 }
 
-const serpent = new Serpent(ctx, 8, 8, 1);
-serpent.draw();
+// Création d'un objet de la classe Serpent
+const s = new Serpent(10, 10, 9, 1);
 
-// const mob1 = new Anneau(ctx, 1, 1);
-// const mob2 = new Anneau(ctx, 2, 1);
-// mob1.draw();
-// mob2.draw();
+//---------- Gestion de l'animation ----------
 
-document.onkeydown = checkKey;
-
-function checkKey(e) {
-
-    e = e || window.event;
-
-    if (e.keyCode == '38') {
-        //up arrow
-        console.log(e.keyCode);
-        ctx.clearRect(0,0,400,400);
-        mob2.copy(mob1);
-        mob1.move(0);
-        mob1.draw();
-        mob2.draw();
-    }
-    else if (e.keyCode == '40') {
-        //down arrow
-        console.log(e.keyCode);
-        ctx.clearRect(0,0,400,400);
-        mob2.copy(mob1);
-        mob1.move(2);
-        mob1.draw();
-        mob2.draw();
-    }
-    else if (e.keyCode == '37') {
-        //left arrow
-        console.log(e.keyCode);
-        ctx.clearRect(0,0,400,400);
-        mob2.copy(mob1);
-        mob1.move(1);
-        mob1.draw();
-        mob2.draw();
-    }
-    else if (e.keyCode == '39') {
-        //right arrow
-        console.log(e.keyCode);
-        ctx.clearRect(0,0,400,400);
-        mob2.copy(mob1);
-        mob1.move(3);
-        mob1.draw();
-        mob2.draw();
-    }
-
+// Fonction animant le serpent s
+function anim() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	s.move();
+	s.draw();
 }
+
+// Identifiant du "timer"
+let animationTimer = 0;
+let starttime = 0;
+// Fréquence d'affichage maximum
+const maxfps = 10;
+const interval = 1000 / maxfps;
+
+// Fonction permettant de démarrer l'animation
+function startRAF(timestamp = 0) {
+	animationTimer = requestAnimationFrame(startRAF);
+	if (starttime === 0) starttime = timestamp;
+	let delta = timestamp - starttime;
+	if (delta >= interval) {
+		// Appel à la fonction d'animation
+		anim();
+		starttime = timestamp - (delta % interval);
+	}
+}
+
+// Fonction permettant d'arrêter l'animation
+function stopRAF() {
+	cancelAnimationFrame(animationTimer);
+	animationTimer = 0;
+}
+
+// Déclenchement de l'animation
+startRAF();
