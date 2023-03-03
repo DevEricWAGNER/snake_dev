@@ -1,7 +1,5 @@
 //------------- Fonctions utiles -------------
 
-// Fonction générant des nombres pseudo-aléatoires entiers
-// entre 0 et max (max non compris)
 function getRandomInt(max)
 {
 	return Math.floor(Math.random()*max);
@@ -14,17 +12,14 @@ function getRandomColor()
 	const blue  = Math.floor((Math.random()*256));
 	const green = Math.floor((Math.random()*256));
 	return "rgb("+red+","+green+","+blue+")";
-	//return "rgba("+red+","+green+","+blue+",0.5)";
 }
 const largeur=20;
 const hauteur=20;
 
 var score = 0;
+var highscore = 0;
 
 const score_text = document.getElementById('score_text');
-
-// Exemple d'affectation d'une valeur à l'élément du tableau
-// tab à la colonne d'indice i et à la ligne d'indice j
 
 //------ Récupération du canvas ------
 
@@ -33,9 +28,7 @@ const ctx = canvas.getContext('2d');
 
 // Taille du côté d'un anneau en pixels dans
 const anneauSize = 20;
-// Taille de la grille du terrain en nombre de cellules
-// (on suppose que canvas.width et canvas.height sont
-// divisibles par anneauSize)
+
 const gridWidth = Math.floor(canvas.width / anneauSize);
 const gridHeight = Math.floor(canvas.height / anneauSize);
 
@@ -46,12 +39,6 @@ class CreateCollectibleItem {
 		this.j = getRandomInt(gridHeight);
 	}
 
-	// item = {
-	// 	x: getRandomInt(gridWidth) * anneauSize,
-	// 	y: getRandomInt(gridHeight) * anneauSize,
-	// 	size: anneauSize
-	// };
-
 	draw() {
 		ctx.fillStyle = '#ff00ff';
 		ctx.fillRect(this.i * anneauSize, this.j * anneauSize, anneauSize, anneauSize);
@@ -61,9 +48,6 @@ class CreateCollectibleItem {
 		this.i = getRandomInt(gridWidth);
 		this.j = getRandomInt(gridHeight);
 	}
-
-
-
 }
 
 
@@ -81,41 +65,6 @@ class Anneau {
 		ctx.fillRect(this.i * anneauSize, this.j * anneauSize,
 		anneauSize, anneauSize);
 	}
-	
-	/*
-	// 1ère version avec des if
-	move(dir) {
-		if (dir == 0) {
-			// Déplacement vers le haut
-			if (this.j == 0) {
-				this.j = gridHeight - 1;
-			}
-			else this.j--;
-		}
-		else if (dir == 1) {
-			// Déplacement vers la droite
-			if (this.i == gridWidth - 1) {
-				this.i = 0;
-			}
-			else this.i++;
-		}
-		else if (dir == 2) {
-			// Déplacement vers le bas
-			if (this.j == gridHeight - 1) {
-				this.j = 0;
-			}
-			else this.j++;
-		}
-		else if (dir == 3) {
-			// Déplacement vers la gauche
-			if (this.i == 0) {
-				this.i = gridWidth - 1;
-			}
-			this.i--;
-		}
-	}
-	*/
-	
 	// 2ème version avec switch case
 	move(dir) {
 		switch(dir) {
@@ -206,6 +155,40 @@ class Serpent {
 // Création d'un objet de la classe Serpent
 const item = new CreateCollectibleItem();
 const s = new Serpent(10, 10, 9, 1);
+const play_game = document.getElementById('play_game');
+
+play_game.addEventListener('click', function() {
+	startRAF();
+})
+
+function enregistrerScore() {
+	const confirmation = confirm(`Votre score est de ${score} points. Voulez-vous l'enregistrer ?`);
+	if (confirmation) {
+		const nom = prompt('Entrez votre nom :');
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', 'score.json');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+				alert(`Score enregistré pour ${nom} !`);
+				gameOver();
+			} else {
+				alert('Erreur lors de l\'enregistrement du score.');
+				gameOver();
+			}
+		};
+		xhr.send(JSON.stringify({ nom: nom, score: score }));
+	} else {
+		gameOver();
+	}
+}
+
+function gameOver() {
+	clearInterval(intervalId);
+	alert('Perdu !');
+	stopRAF();
+}
+  
 
 //---------- Gestion de l'animation ----------
 
@@ -218,6 +201,7 @@ function anim() {
 	score_text.innerText = "Score : " + score;
 	
 	// console.log(item.i, item.j, s.anneaux[0].i, s.anneaux[0].j);
+	
 	if (item.i == s.anneaux[0].i && item.j == s.anneaux[0].j) {
 		s.extends();
 		item.move();
@@ -226,6 +210,17 @@ function anim() {
 		score_text.innerText = "Score : " + score;
 		// console.log(score);
 	}	
+	
+	for (let i = 1; i < s.anneaux.length; i++) {
+		// console.log(s.anneaux[i].i);
+		// console.log(s.anneaux[i].j);
+		if (s.anneaux[0].i == s.anneaux[i].i && s.anneaux[0].j == s.anneaux[i].j) {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			// startRAF();
+			// alert('Vous avez perdu avec un score égal à :' + score);
+			enregistrerScore();
+		}
+	}
 }
 
 // Identifiant du "timer"
@@ -251,10 +246,17 @@ function startRAF(timestamp = 0) {
 function stopRAF() {
 	cancelAnimationFrame(animationTimer);
 	animationTimer = 0;
+	reset();
 }
 
+function reset() {
+	score = 0;
+	location.reload();
+}
+
+
 // Déclenchement de l'animation
-startRAF();
+// startRAF();
 
 document.addEventListener('keydown', function(event) {
     if(event.key == "ArrowLeft") {
@@ -272,6 +274,25 @@ document.addEventListener('keydown', function(event) {
     else if(event.key == "ArrowDown") {
         // alert('La flèche du bas a été préssée');
         s.changeDirection(2);
-        // s.extends();
     }
 });
+
+window.onload = function() {
+	const xhr = new XMLHttpRequest();
+	xhr.open('GET', 'score.json');
+	xhr.onload = function() {
+	  if (xhr.status === 200) {
+		const scores = JSON.parse(xhr.responseText);
+		for (let i = 0; i < scores.length; i++) {
+		  if (scores[i].score > highscore) {
+			highscore = scores[i].score;
+		  }
+		}
+		document.getElementById('highscore_text').innerHTML = `Highscore : ${highscore}`;
+	  } else {
+		alert('Erreur lors de la récupération des scores.');
+	  }
+	};
+	xhr.send();
+  };
+  
