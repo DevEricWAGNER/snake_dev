@@ -19,15 +19,9 @@ function getRandomColor()
 const largeur=20;
 const hauteur=20;
 
-const tab = new Array(largeur);
-for (let i = 0; i < tab.length; i++) {
-  tab[i] = new Array(hauteur);
-  for (let j = 0; j < tab[i].length; j++) {
-      tab[i][j] = 1;
-    
-  }
+var score = 0;
 
-}
+const score_text = document.getElementById('score_text');
 
 // Exemple d'affectation d'une valeur à l'élément du tableau
 // tab à la colonne d'indice i et à la ligne d'indice j
@@ -221,13 +215,17 @@ function anim() {
 	s.move();
 	s.draw();
 	item.draw();
+	score_text.innerText = "Score : " + score;
 	
 	// console.log(item.i, item.j, s.anneaux[0].i, s.anneaux[0].j);
 	if (item.i == s.anneaux[0].i && item.j == s.anneaux[0].j) {
 		s.extends();
 		item.move();
 		item.draw();
-}	
+		score = score + 1;
+		score_text.innerText = "Score : " + score;
+		// console.log(score);
+	}	
 }
 
 // Identifiant du "timer"
