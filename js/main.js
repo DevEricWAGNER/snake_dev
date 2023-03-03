@@ -16,6 +16,21 @@ function getRandomColor()
 	return "rgb("+red+","+green+","+blue+")";
 	//return "rgba("+red+","+green+","+blue+",0.5)";
 }
+const largeur=20;
+const hauteur=20;
+
+const tab = new Array(largeur);
+for (let i = 0; i < tab.length; i++) {
+  tab[i] = new Array(hauteur);
+  for (let j = 0; j < tab[i].length; j++) {
+      tab[i][j] = 1;
+    
+  }
+
+}
+
+// Exemple d'affectation d'une valeur à l'élément du tableau
+// tab à la colonne d'indice i et à la ligne d'indice j
 
 //------ Récupération du canvas ------
 
@@ -29,6 +44,7 @@ const anneauSize = 20;
 // divisibles par anneauSize)
 const gridWidth = Math.floor(canvas.width / anneauSize);
 const gridHeight = Math.floor(canvas.height / anneauSize);
+
 
 //---------- Classe Anneau ----------
 	
@@ -140,6 +156,20 @@ class Serpent {
 	changeDirection(dir) {
 		this.dir = dir;
 	}
+
+	extends() {
+		const dernier_anneau = this.anneaux[this.longueur-1];
+		dernier_anneau.color = '#00ff00';
+		const avant_dernier_anneau = this.anneaux[this.longueur-2];
+		const nouvelle_position = {
+			x: dernier_anneau.i + (dernier_anneau.i - avant_dernier_anneau.i),
+			y: dernier_anneau.j + (dernier_anneau.j - avant_dernier_anneau.j)
+		};
+		const nouvel_anneau = new Anneau(nouvelle_position.x, nouvelle_position.y, '#0000ff');
+		this.anneaux.push(nouvel_anneau);
+		this.longueur++;
+	}
+	
 }
 
 // Création d'un objet de la classe Serpent
@@ -198,5 +228,6 @@ document.addEventListener('keydown', function(event) {
     else if(event.key == "ArrowDown") {
         // alert('La flèche du bas a été préssée');
         s.changeDirection(2);
+        s.extends();
     }
 });
