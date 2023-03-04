@@ -21,14 +21,6 @@ var highscore = 0;
 
 const score_text = document.getElementById('score_text');
 
-const mysql = require('mysql2');
-const connection = mysql.createConnection({
-	host: 'localhost',
-	user: 'root',
-	password: '',
-	database: 'snake_test'
-  });
-
 //------ Récupération du canvas ------
 
 const canvas = document.getElementById('terrain');
@@ -167,7 +159,36 @@ const play_game = document.getElementById('play_game');
 
 play_game.addEventListener('click', function() {
 	startRAF();
-});
+})
+
+function enregistrerScore() {
+	const confirmation = confirm(`Votre score est de ${score} points. Voulez-vous l'enregistrer ?`);
+	if (confirmation) {
+		const nom = prompt('Entrez votre nom :');
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', './js/score.json');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+				alert(`Score enregistré pour ${nom} !`);
+				gameOver();
+			} else {
+				alert('Erreur lors de l\'enregistrement du score.');
+				gameOver();
+			}
+		};
+		xhr.send(JSON.stringify({ nom: nom, score: score }));
+	} else {
+		gameOver();
+	}
+}
+
+function gameOver() {
+	clearInterval(intervalId);
+	alert('Perdu !');
+	stopRAF();
+}
+  
 
 //---------- Gestion de l'animation ----------
 
@@ -195,8 +216,9 @@ function anim() {
 		// console.log(s.anneaux[i].j);
 		if (s.anneaux[0].i == s.anneaux[i].i && s.anneaux[0].j == s.anneaux[i].j) {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			startRAF();
-			alert('Vous avez perdu avec un score égal à :' + score);
+			// startRAF();
+			// alert('Vous avez perdu avec un score égal à :' + score);
+			enregistrerScore();
 		}
 	}
 }
@@ -254,4 +276,23 @@ document.addEventListener('keydown', function(event) {
         s.changeDirection(2);
     }
 });
+
+window.onload = function() {
+	const xhr = new XMLHttpRequest();
+	xhr.open('GET', './js/score.json');
+	xhr.onload = function() {
+	  	if (xhr.status === 200) {
+			const scores = JSON.parse(xhr.responseText);
+			for (let i = 0; i < scores.length; i++) {
+		  		if (scores[i].score > highscore) {
+					highscore = scores[i].score;
+		  		}
+			}
+			document.getElementById('highscore_text').innerHTML = `Highscore : ${highscore}`;
+	  	} else {
+			alert('Erreur lors de la récupération des scores.');
+	  	}
+	};
+	xhr.send();
+};
   
