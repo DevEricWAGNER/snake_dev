@@ -155,6 +155,7 @@ class Serpent {
 // Création d'un objet de la classe Serpent
 const item = new CreateCollectibleItem();
 const s = new Serpent(10, 10, 9, 1);
+const s1 = new Serpent(3, 1, 1, 1);
 const play_game = document.getElementById('play_game');
 
 play_game.addEventListener('click', function() {
