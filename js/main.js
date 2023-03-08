@@ -31,6 +31,12 @@ const anneauSize = 20;
 const gridWidth = Math.floor(canvas.width / anneauSize);
 const gridHeight = Math.floor(canvas.height / anneauSize);
 
+
+var numRows = canvas.height / anneauSize; // nombre de rangées
+var numCols = canvas.width / anneauSize; // nombre de colonnes
+var colors = ["#eee", "#ddd"];
+
+
 class CreateCollectibleItem {
 
 	constructor() {
@@ -108,7 +114,7 @@ class Anneau {
 //---------- Classe Serpent ----------
 
 class Serpent {
-	constructor(longueur, i, j, dir) {
+	constructor(longueur, i, j, dir, color) {
 		// Longueur du serpent
 		this.longueur = longueur;
 		// Direction initiale
@@ -119,7 +125,7 @@ class Serpent {
 		this.anneaux.push(tete);
 		// Création des anneaux du reste du corps
 		for (let l = 1; l < longueur - 1; l++) {
-			let anneau = new Anneau(i - l, j, '#00ff00');
+			let anneau = new Anneau(i - l, j, color);
 			this.anneaux.push(anneau);
 		}
 		// Création de l'anneau de queue
@@ -218,9 +224,16 @@ const rock = new CreateRock();
 const rock1 = new CreateRock();
 const rock2 = new CreateRock();
 const rock3 = new CreateRock();
-const s = new Serpent(10, 10, 9, 1);
-const s1 = new Serpent(4, 5, 5, 1);
+const s = new Serpent(10, 10, 9, 1, '#00ff00');
+const s1 = new Serpent(4, 5, 15, 1, getRandomColor());
+const s2 = new Serpent(4, 18, 5, 1, getRandomColor());
+const s3 = new Serpent(4, 14, 12, 1, getRandomColor());
+const s4 = new Serpent(4, 3, 9, 1, getRandomColor());
+const s5 = new Serpent(4, 15, 4, 1, getRandomColor());
+const s6 = new Serpent(4, 8, 2, 1, getRandomColor());
 const play_game = document.getElementById('play_game');
+
+let snakeList = [s1, s2, s3, s4, s5, s6];
 
 play_game.addEventListener('click', function() {
 	startRAF();
@@ -231,12 +244,23 @@ play_game.addEventListener('click', function() {
 // Fonction animant le serpent s
 function anim() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	for (var row = 0; row < numRows; row++) {
+		for (var col = 0; col < numCols; col++) {
+		  var colorIndex = (row + col) % 2; // alterne les couleurs pour chaque case
+		  var color = colors[colorIndex];
+		  ctx.fillStyle = color;
+		  ctx.fillRect(col * anneauSize, row * anneauSize, anneauSize, anneauSize);
+		}
+	}
+	
 	s.move();
 	s.draw();
 
-	s1.draw();
-	s1.move();
-	s1.randomMove();
+	snakeList.forEach(sRandom => {
+		sRandom.draw();
+		sRandom.move();
+		sRandom.randomMove();
+	})
 
 	rock.draw();
 	rock1.draw();
