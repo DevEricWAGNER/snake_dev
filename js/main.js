@@ -17,7 +17,6 @@ const largeur=20;
 const hauteur=20;
 
 var score = 0;
-var highscore = 0;
 
 const score_text = document.getElementById('score_text');
 
@@ -41,7 +40,29 @@ class CreateCollectibleItem {
 
 	draw() {
 		ctx.fillStyle = '#ff00ff';
+		ctx.beginPath();
+        ctx.arc(this.i * anneauSize + anneauSize / 2, this.j * anneauSize + anneauSize / 2, anneauSize / 2, 0, 2 * Math.PI);
+        ctx.fill();
+	}
+
+	move() {
+		this.i = getRandomInt(gridWidth);
+		this.j = getRandomInt(gridHeight);
+	}
+}
+
+class CreateRock {
+
+	constructor() {
+		this.i = getRandomInt(gridWidth);
+		this.j = getRandomInt(gridHeight);
+	}
+
+	draw() {
+		ctx.fillStyle = '#000000';
+        // ctx.beginPath();
 		ctx.fillRect(this.i * anneauSize, this.j * anneauSize, anneauSize, anneauSize);
+		// ctx.arc(this.i * anneauSize, this.j * anneauSize, anneauSize, anneauSize);
 	}
 
 	move() {
@@ -62,8 +83,7 @@ class Anneau {
 	
 	draw() {
 		ctx.fillStyle = this.color;
-		ctx.fillRect(this.i * anneauSize, this.j * anneauSize,
-		anneauSize, anneauSize);
+		ctx.fillRect(this.i * anneauSize, this.j * anneauSize, anneauSize, anneauSize);
 	}
 	// 2ème version avec switch case
 	move(dir) {
@@ -105,6 +125,7 @@ class Serpent {
 		// Création de l'anneau de queue
 		const queue = new Anneau(i - (longueur - 1), j, '#0000ff');
 		this.anneaux.push(queue);
+        this.lastMove = 0;
 	}
 	
 	draw() {
@@ -122,6 +143,45 @@ class Serpent {
 		// On déplace la tête
 		this.anneaux[0].move(this.dir);
 	}
+	randomMove() {
+
+        this.lastMove++;
+
+        if (this.lastMove > 5) {
+            if (Math.random() < (.5 + (Number(this.lastMove - 5)) / 10)) {
+                const randomMove = Math.floor(Math.random() * 4);
+
+                if (randomMove === this.dir) {
+                    return;
+                }
+
+                switch(randomMove) {
+                    case 0 :
+                        if (this.dir === 2) {
+                            return;
+                        }
+                        break;
+                    case 1 :
+                        if (this.dir === 3) {
+                            return;
+                        }
+                    case 2 :
+                        if (this.dir === 0) {
+                            return;
+                        }
+                        break;
+                    case 3 :
+                        if (this.dir === 1) {
+                            return;
+                        }
+                        break;
+                }
+
+                this.dir = randomMove
+                this.lastMove = 0;
+            }
+        }
+    }
 	
 	changeDirection(dir) {
 		if (s.dir == 0 && dir == 2) {
@@ -154,42 +214,17 @@ class Serpent {
 
 // Création d'un objet de la classe Serpent
 const item = new CreateCollectibleItem();
+const rock = new CreateRock();
+const rock1 = new CreateRock();
+const rock2 = new CreateRock();
+const rock3 = new CreateRock();
 const s = new Serpent(10, 10, 9, 1);
-const s1 = new Serpent(3, 1, 1, 1);
+const s1 = new Serpent(4, 5, 5, 1);
 const play_game = document.getElementById('play_game');
 
 play_game.addEventListener('click', function() {
 	startRAF();
 })
-
-function enregistrerScore() {
-	const confirmation = confirm(`Votre score est de ${score} points. Voulez-vous l'enregistrer ?`);
-	if (confirmation) {
-		const nom = prompt('Entrez votre nom :');
-		const xhr = new XMLHttpRequest();
-		xhr.open('POST', './js/score.json');
-		xhr.setRequestHeader('Content-Type', 'application/json');
-		xhr.onload = function() {
-			if (xhr.status === 200) {
-				alert(`Score enregistré pour ${nom} !`);
-				gameOver();
-			} else {
-				alert('Erreur lors de l\'enregistrement du score.');
-				gameOver();
-			}
-		};
-		xhr.send(JSON.stringify({ nom: nom, score: score }));
-	} else {
-		gameOver();
-	}
-}
-
-function gameOver() {
-	clearInterval(intervalId);
-	alert('Perdu !');
-	stopRAF();
-}
-  
 
 //---------- Gestion de l'animation ----------
 
@@ -198,6 +233,16 @@ function anim() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	s.move();
 	s.draw();
+
+	s1.draw();
+	s1.move();
+	s1.randomMove();
+
+	rock.draw();
+	rock1.draw();
+	rock2.draw();
+	rock3.draw();
+
 	item.draw();
 	score_text.innerText = "Score : " + score;
 	
@@ -217,10 +262,24 @@ function anim() {
 		// console.log(s.anneaux[i].j);
 		if (s.anneaux[0].i == s.anneaux[i].i && s.anneaux[0].j == s.anneaux[i].j) {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			// startRAF();
-			// alert('Vous avez perdu avec un score égal à :' + score);
-			enregistrerScore();
+			stopRAF();
+			// enregistrerScore();
 		}
+	}
+
+
+	if (rock.i == s.anneaux[0].i && rock.j == s.anneaux[0].j) {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		stopRAF();
+	} else if (rock1.i == s.anneaux[0].i && rock1.j == s.anneaux[0].j) {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		stopRAF();
+	} else if (rock2.i == s.anneaux[0].i && rock2.j == s.anneaux[0].j) {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		stopRAF();
+	} else if (rock3.i == s.anneaux[0].i && rock3.j == s.anneaux[0].j) {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		stopRAF();
 	}
 }
 
@@ -247,6 +306,7 @@ function startRAF(timestamp = 0) {
 function stopRAF() {
 	cancelAnimationFrame(animationTimer);
 	animationTimer = 0;
+	alert('Vous avez perdu avec un score égal à :' + score);
 	reset();
 }
 
