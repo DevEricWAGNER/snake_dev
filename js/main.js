@@ -361,23 +361,3 @@ document.addEventListener('keydown', function(event) {
         s.changeDirection(2);
     }
 });
-
-window.onload = function() {
-	const xhr = new XMLHttpRequest();
-	xhr.open('GET', './js/score.json');
-	xhr.onload = function() {
-	  	if (xhr.status === 200) {
-			const scores = JSON.parse(xhr.responseText);
-			for (let i = 0; i < scores.length; i++) {
-		  		if (scores[i].score > highscore) {
-					highscore = scores[i].score;
-		  		}
-			}
-			document.getElementById('highscore_text').innerHTML = `Highscore : ${highscore}`;
-	  	} else {
-			alert('Erreur lors de la récupération des scores.');
-	  	}
-	};
-	xhr.send();
-};
-  
