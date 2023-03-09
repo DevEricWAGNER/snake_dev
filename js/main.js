@@ -234,6 +234,7 @@ const s6 = new Serpent(4, 8, 2, 1, getRandomColor());
 const play_game = document.getElementById('play_game');
 
 let snakeList = [s1, s2, s3, s4, s5, s6];
+let rockList = [rock, rock1, rock2, rock3];
 
 play_game.addEventListener('click', function() {
 	startRAF();
@@ -262,10 +263,9 @@ function anim() {
 		sRandom.randomMove();
 	})
 
-	rock.draw();
-	rock1.draw();
-	rock2.draw();
-	rock3.draw();
+	rockList.forEach(rocks => {
+		rocks.draw();
+	})
 
 	item.draw();
 	score_text.innerText = "Score : " + score;
@@ -292,19 +292,12 @@ function anim() {
 	}
 
 
-	if (rock.i == s.anneaux[0].i && rock.j == s.anneaux[0].j) {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		stopRAF();
-	} else if (rock1.i == s.anneaux[0].i && rock1.j == s.anneaux[0].j) {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		stopRAF();
-	} else if (rock2.i == s.anneaux[0].i && rock2.j == s.anneaux[0].j) {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		stopRAF();
-	} else if (rock3.i == s.anneaux[0].i && rock3.j == s.anneaux[0].j) {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		stopRAF();
-	}
+	rockList.forEach(rocks => {
+		if (rocks.i == s.anneaux[0].i && rocks.j == s.anneaux[0].j) {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			stopRAF();
+		}
+	});
 }
 
 // Identifiant du "timer"
