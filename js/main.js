@@ -34,7 +34,7 @@ const gridHeight = Math.floor(canvas.height / anneauSize);
 
 var numRows = canvas.height / anneauSize; // nombre de rangées
 var numCols = canvas.width / anneauSize; // nombre de colonnes
-var colors = ["#eee", "#ddd"];
+var colors = ["#ccc", "#bbb"];
 
 
 class CreateCollectibleItem {
@@ -224,13 +224,13 @@ const rock = new CreateRock();
 const rock1 = new CreateRock();
 const rock2 = new CreateRock();
 const rock3 = new CreateRock();
-const s = new Serpent(10, 10, 9, 1, '#00ff00');
-const s1 = new Serpent(4, 5, 15, 1, getRandomColor());
-const s2 = new Serpent(4, 18, 5, 1, getRandomColor());
-const s3 = new Serpent(4, 14, 12, 1, getRandomColor());
-const s4 = new Serpent(4, 3, 9, 1, getRandomColor());
-const s5 = new Serpent(4, 15, 4, 1, getRandomColor());
-const s6 = new Serpent(4, 8, 2, 1, getRandomColor());
+const s = new Serpent(6, 10, 9, 1, '#00ff00');
+const s1 = new Serpent(5, 5, 15, 1, getRandomColor());
+const s2 = new Serpent(3, 18, 5, 1, getRandomColor());
+const s3 = new Serpent(8, 14, 12, 1, getRandomColor());
+const s4 = new Serpent(3, 3, 9, 1, getRandomColor());
+const s5 = new Serpent(3, 15, 4, 1, getRandomColor());
+const s6 = new Serpent(5, 8, 2, 1, getRandomColor());
 const play_game = document.getElementById('play_game');
 
 let snakeList = [s1, s2, s3, s4, s5, s6];
@@ -272,6 +272,15 @@ function anim() {
 	
 	// console.log(item.i, item.j, s.anneaux[0].i, s.anneaux[0].j);
 	
+	snakeList.forEach(sRandom => {
+		if (item.i == sRandom.i && item.j == sRandom.j) {
+			sRandom.extends();
+			item.move();
+			item.draw();
+		}
+	})
+
+
 	if (item.i == s.anneaux[0].i && item.j == s.anneaux[0].j) {
 		s.extends();
 		item.move();
